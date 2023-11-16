@@ -4,6 +4,7 @@ from django.contrib.auth.models import  AbstractBaseUser, BaseUserManager
 
 class UserManager(BaseUserManager):
     def create_user(self, phone, password, **other):
+        other.setdefault('is_active',True)
         user = self.model(phone=phone,**other)
         user.set_password(password)
         user.save()

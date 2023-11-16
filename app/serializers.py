@@ -29,10 +29,12 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField()
 
 
+# user must be logged in
 class UserChangePasswordSerializer(serializers.Serializer):
     password = serializers.CharField()
 
 
+# when user is not logged in
 class SendResetPasswordLinkSerializer(serializers.Serializer):
     email = serializers.EmailField()
     def validate_email(self, email):

@@ -10,6 +10,7 @@ from app.models import CustomUser
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode as encode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.contrib.auth.hashers import make_password, check_password
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -34,6 +35,7 @@ class LoginView(APIView):
         if serializer.is_valid():
             phone = serializer.validated_data.get('phone')
             password = serializer.validated_data.get('password')
+            print(phone,password)
             user = authenticate(phone=phone, password=password)
             if user is not None:
                 return Response(get_tokens_for_user(user))
@@ -49,11 +51,12 @@ class UserProfileView(APIView):
         return Response("user profile")
 
 
+# user must be logged in
 class UserChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):
         print(request.user.password)
-        serializer = UserChangePasswordSerializer(data=request.data, context={'user':request.user})
+        serializer = UserChangePasswordSerializer(data=request.data)
         if serializer.is_valid():
             user = request.user
             password = serializer.validated_data.get('password')
@@ -64,6 +67,9 @@ class UserChangePasswordView(APIView):
             return Response(serializer.errors)
 
 
+
+
+# when user is not logged in
 class SendResetPasswordLinkView(APIView):
     def post(self, request):
         serializer = SendResetPasswordLinkSerializer(data=request.data)
@@ -79,7 +85,6 @@ class SendResetPasswordLinkView(APIView):
             return Response({'link':link})
         else:
             return Response(serializer.errors)
-
 
 class ResetPasswordView(APIView):
     def post(self, request, uid, token):
